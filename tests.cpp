@@ -2,6 +2,21 @@
 #include "shared-ptr.h"
 #include "tests-extra/test-object.h"
 
+namespace {
+size_t new_calls = 0;
+size_t delete_calls = 0;
+} // namespace
+
+void* operator new(std::size_t count) {
+  new_calls += 1;
+  return malloc(count);
+}
+
+void operator delete(void* ptr) noexcept {
+  delete_calls += 1;
+  free(ptr);
+}
+
 TEST(shared_ptr_testing, default_ctor) {
   shared_ptr<test_object> p;
   EXPECT_EQ(nullptr, p.get());
@@ -237,4 +252,54 @@ TEST(shared_ptr_testing, make_shared_weak_ptr) {
     p = q;
   }
   g.expect_no_instances();
+}
+
+TEST(shared_ptr_testing, weak_ptr_allocations) {
+  size_t new_calls_before = new_calls;
+  size_t delete_calls_before = delete_calls;
+  int* i_p = new int(1337);
+  weak_ptr<int> w_p;
+  {
+    shared_ptr<int> s_p(i_p);
+    w_p = s_p;
+  }
+  EXPECT_EQ(new_calls - new_calls_before, 2);
+  EXPECT_EQ(delete_calls - delete_calls_before, 1);
+  EXPECT_FALSE(w_p.lock());
+}
+
+TEST(shared_ptr_testing, make_shared_weak_ptr_allocations) {
+  size_t new_calls_before = new_calls;
+  size_t delete_calls_before = delete_calls;
+  weak_ptr<int> w_p;
+  {
+    shared_ptr<int> s_p = make_shared<int>(42);
+    w_p = s_p;
+  }
+  EXPECT_EQ(new_calls - new_calls_before, 1);
+  EXPECT_EQ(delete_calls - delete_calls_before, 0);
+  EXPECT_FALSE(w_p.lock());
+}
+
+TEST(shared_ptr_testing, allocations) {
+  size_t new_calls_before = new_calls;
+  size_t delete_calls_before = delete_calls;
+  int* i_p = new int(1337);
+  {
+    shared_ptr<int> p(i_p);
+    EXPECT_EQ(*i_p, *p);
+  }
+  EXPECT_EQ(new_calls - new_calls_before, 2);
+  EXPECT_EQ(delete_calls - delete_calls_before, 2);
+}
+
+TEST(shared_ptr_testing, make_shared_allocations) {
+  size_t new_calls_before = new_calls;
+  size_t delete_calls_before = delete_calls;
+  {
+    shared_ptr<int> p = make_shared<int>(42);
+    EXPECT_EQ(42, *p);
+  }
+  EXPECT_EQ(new_calls - new_calls_before, 1);
+  EXPECT_EQ(delete_calls - delete_calls_before, 1);
 }
