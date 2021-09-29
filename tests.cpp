@@ -1,21 +1,6 @@
-#include <gtest/gtest.h>
 #include "shared-ptr.h"
 #include "tests-extra/test-object.h"
-
-namespace {
-size_t new_calls = 0;
-size_t delete_calls = 0;
-} // namespace
-
-void* operator new(std::size_t count) {
-  new_calls += 1;
-  return malloc(count);
-}
-
-void operator delete(void* ptr) noexcept {
-  delete_calls += 1;
-  free(ptr);
-}
+#include <gtest/gtest.h>
 
 TEST(shared_ptr_testing, default_ctor) {
   shared_ptr<test_object> p;
@@ -254,6 +239,32 @@ TEST(shared_ptr_testing, make_shared_weak_ptr) {
   g.expect_no_instances();
 }
 
+#if defined(__has_feature)
+#if __has_feature(address_sanitizer)
+#define ASAN 1
+#endif
+#endif
+
+#ifndef ASAN
+namespace {
+size_t new_calls = 0;
+size_t delete_calls = 0;
+} // namespace
+void* operator new(std::size_t count) {
+  new_calls += 1;
+  return malloc(count);
+}
+
+void operator delete(void* ptr) noexcept {
+  delete_calls += 1;
+  free(ptr);
+}
+
+void operator delete(void* ptr, size_t) noexcept {
+  delete_calls += 1;
+  free(ptr);
+}
+
 TEST(shared_ptr_testing, weak_ptr_allocations) {
   size_t new_calls_before = new_calls;
   size_t delete_calls_before = delete_calls;
@@ -303,3 +314,4 @@ TEST(shared_ptr_testing, make_shared_allocations) {
   EXPECT_EQ(new_calls - new_calls_before, 1);
   EXPECT_EQ(delete_calls - delete_calls_before, 1);
 }
+#endif
