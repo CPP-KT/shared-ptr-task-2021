@@ -1,6 +1,6 @@
+#include <gtest/gtest.h>
 #include "shared-ptr.h"
 #include "tests-extra/test-object.h"
-#include <gtest/gtest.h>
 
 TEST(shared_ptr_testing, default_ctor) {
   shared_ptr<test_object> p;
@@ -241,11 +241,11 @@ TEST(shared_ptr_testing, make_shared_weak_ptr) {
 
 #if defined(__has_feature)
 #if __has_feature(address_sanitizer)
-#define ASAN 1
+#define DISABLE_ALLOCATION_TESTS 1
 #endif
 #endif
 
-#ifndef ASAN
+#ifndef DISABLE_ALLOCATION_TESTS
 namespace {
 size_t new_calls = 0;
 size_t delete_calls = 0;
