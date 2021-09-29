@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.12)
-project(template)
+project(shared-ptr)
 
 set(CMAKE_CXX_STANDARD 17)
+include_directories(${CMAKE_SOURCE_DIR})
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
@@ -35,5 +36,5 @@ elseif (NOT MSVC)
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=undefined,address,leak -fno-sanitize-recover=all -D_GLIBCXX_DEBUG")
 endif()
 
-add_executable(tests tests.cpp)
+add_executable(tests tests.cpp shared-ptr.h tests-extra/test-object.cpp)
 target_link_libraries(tests gtest_main)
