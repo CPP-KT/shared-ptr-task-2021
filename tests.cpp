@@ -274,8 +274,10 @@ TEST(shared_ptr_testing, weak_ptr_allocations) {
     shared_ptr<int> s_p(i_p);
     w_p = s_p;
   }
-  EXPECT_EQ(new_calls - new_calls_before, 2);
-  EXPECT_EQ(delete_calls - delete_calls_before, 1);
+  const auto new_calls_after = new_calls;
+  const auto delete_calls_after = delete_calls;
+  EXPECT_EQ(new_calls_after - new_calls_before, 2);
+  EXPECT_EQ(delete_calls_after - delete_calls_before, 1);
   EXPECT_FALSE(w_p.lock());
 }
 
@@ -287,8 +289,10 @@ TEST(shared_ptr_testing, make_shared_weak_ptr_allocations) {
     shared_ptr<int> s_p = make_shared<int>(42);
     w_p = s_p;
   }
-  EXPECT_EQ(new_calls - new_calls_before, 1);
-  EXPECT_EQ(delete_calls - delete_calls_before, 0);
+  const auto new_calls_after = new_calls;
+  const auto delete_calls_after = delete_calls;
+  EXPECT_EQ(new_calls_after - new_calls_before, 1);
+  EXPECT_EQ(delete_calls_after - delete_calls_before, 0);
   EXPECT_FALSE(w_p.lock());
 }
 
@@ -300,8 +304,10 @@ TEST(shared_ptr_testing, allocations) {
     shared_ptr<int> p(i_p);
     EXPECT_EQ(*i_p, *p);
   }
-  EXPECT_EQ(new_calls - new_calls_before, 2);
-  EXPECT_EQ(delete_calls - delete_calls_before, 2);
+  const auto new_calls_after = new_calls;
+  const auto delete_calls_after = delete_calls;
+  EXPECT_EQ(new_calls_after - new_calls_before, 2);
+  EXPECT_EQ(delete_calls_after - delete_calls_before, 2);
 }
 
 TEST(shared_ptr_testing, make_shared_allocations) {
@@ -311,7 +317,9 @@ TEST(shared_ptr_testing, make_shared_allocations) {
     shared_ptr<int> p = make_shared<int>(42);
     EXPECT_EQ(42, *p);
   }
-  EXPECT_EQ(new_calls - new_calls_before, 1);
-  EXPECT_EQ(delete_calls - delete_calls_before, 1);
+  const auto new_calls_after = new_calls;
+  const auto delete_calls_after = delete_calls;
+  EXPECT_EQ(new_calls_after - new_calls_before, 1);
+  EXPECT_EQ(delete_calls_after - delete_calls_before, 1);
 }
 #endif
